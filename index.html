@@ -1,1 +1,815 @@
-<!doctype html><html><head><title>Test</title></head><body><h1>Agent Loop Holo-Deck - deploying...</h1></body></html>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Chloris Agent HQ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;800&display=swap">
+<style>
+/* Layout: agent-first HQ — isometric office floor (one room per agent, hub, decision desk, waiting area, archive) center stage; overview + throughput on the right; four task cards below. Deliberate single light look (white glass, soft blue). */
+:root{
+  color-scheme:light;
+  --bg1:#f1f5fb; --bg2:#e3ebf6; --card:rgba(255,255,255,.92); --ink:#0f1b2d; --ink2:#3c4a5e; --muted:#5b6b80; --faint:#6b7a8f; --line:#e3e9f2;
+  --blue:#2f6bff; --blue-d:#1d4fd8; --cyan:#18b4d8; --amber:#f59e0b; --orange:#f97316; --red:#f04438; --green:#16b364; --violet:#6d5df5;
+  --f:"Plus Jakarta Sans","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --rx:56deg; --rz:-36deg; --s:1;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;background:linear-gradient(160deg,var(--bg1),var(--bg2));color:var(--ink);font-family:var(--f);font-size:13px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 24px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+a{color:var(--blue)} a:hover{color:var(--blue-d)}
+.shell{max-width:1440px;margin:0 auto;border-radius:32px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.95);box-shadow:0 30px 80px rgba(40,70,130,.10);padding:20px 24px 24px;display:flex;flex-direction:column;gap:16px}
+.pillbox{height:48px;border-radius:24px;background:rgba(255,255,255,.9);box-shadow:0 4px 14px rgba(40,70,130,.06);display:flex;align-items:center;gap:10px;padding:0 18px;font-size:14px}
+
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;padding-left:8px;margin-right:8px}
+.logo b{font-size:21px;font-weight:800;letter-spacing:-.01em} .logo b span{color:var(--blue)}
+.search{flex:1 1 260px;max-width:420px;position:relative;padding:0}
+.search label{display:flex;align-items:center;gap:10px;width:100%;height:100%;padding:0 18px}
+.search input{all:unset;flex:1;min-width:0;font-size:14px}
+.sres{position:absolute;left:0;right:0;top:54px;z-index:20;background:#fff;border-radius:18px;box-shadow:0 18px 40px rgba(30,60,120,.18);padding:6px;max-height:340px;overflow:auto}
+.sres button{display:grid;grid-template-columns:auto 1fr;gap:0 10px;width:100%;text-align:left;padding:8px 10px;border-radius:12px}
+.sres button:hover{background:#f3f6fc}
+.sel{position:relative;padding:0}
+.sel select{appearance:none;-webkit-appearance:none;border:0;background:transparent;height:100%;padding:0 38px 0 18px;font-size:14px;cursor:pointer;border-radius:24px;max-width:220px}
+.sel svg{position:absolute;right:16px;top:50%;margin-top:-6px;pointer-events:none}
+.sp{flex:1}
+.ibtn{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.9);box-shadow:0 4px 14px rgba(40,70,130,.06);display:grid;place-items:center;position:relative;flex:none}
+.ibtn .rd{position:absolute;top:11px;right:13px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid #fff}
+.user{height:56px;border-radius:28px;padding:0 18px 0 6px}
+.user .e{width:44px;height:44px;border-radius:50%;background:#1f2a3d;color:#fff;font-weight:700;display:grid;place-items:center}
+
+.titlebar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 20px;padding:4px 8px 0}
+h1{margin:0;font-size:46px;font-weight:800;letter-spacing:-.02em;line-height:1.1;text-wrap:balance} h1 span{color:var(--blue)}
+.sub{margin:4px 0 0;font-size:15px;color:var(--ink2)}
+.tools{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tools .ibtn{width:44px;height:44px}
+.live{height:44px;padding:0 16px;border-radius:22px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(40,70,130,.08);background:#dcf7e8;color:#0d6b3a}
+.live i{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(22,179,100,.2)}
+.live.warn{background:#fff4dc;color:#92400e}.live.warn i{background:var(--amber);box-shadow:0 0 0 4px rgba(245,158,11,.2)}
+.live.err{background:#fee4e2;color:#912018}.live.err i{background:var(--red);box-shadow:0 0 0 4px rgba(240,68,56,.2)}
+
+.main{display:grid;grid-template-columns:68px minmax(0,1fr) 328px;gap:16px;align-items:start}
+.rail{border-radius:26px;background:var(--card);box-shadow:0 10px 30px rgba(40,70,130,.08);padding:12px 0;display:flex;flex-direction:column;align-items:center;gap:12px}
+.rail button{width:52px;height:52px;border-radius:16px;display:grid;place-items:center}
+.rail button:hover{background:#eef3fd}
+.rail button.on{background:var(--blue);box-shadow:0 8px 18px rgba(47,107,255,.35)}
+.rail button.on svg{stroke:#fff}
+
+.stage{position:relative;height:600px;overflow:hidden;border-radius:24px;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.stage.drag{cursor:grabbing}
+.plane{position:absolute;left:50%;top:50%;width:760px;height:560px;margin:-280px 0 0 -380px;transform-style:preserve-3d;
+  transform:translateY(34px) scale(var(--s)) rotateX(var(--rx)) rotateZ(var(--rz))}
+.ov3{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.ob{position:absolute;left:0;top:0;width:0;height:0;pointer-events:auto}
+.ob.st{pointer-events:none}
+.plane *{transform-style:preserve-3d}
+.legend{position:absolute;left:14px;bottom:10px;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink2);max-width:calc(100% - 28px);pointer-events:none}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:18px;height:4px;border-radius:2px;display:inline-block}
+.hint{position:absolute;right:14px;bottom:10px;font-size:11.5px;color:var(--faint);pointer-events:none}
+.tip{position:absolute;z-index:6;pointer-events:none;max-width:280px;background:#fff;border-radius:12px;box-shadow:0 10px 26px rgba(30,60,120,.18);padding:8px 11px;font-size:12px;line-height:1.45}
+.banner{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:7;width:min(460px,calc(100% - 28px));background:#fff;border-radius:16px;box-shadow:0 12px 30px rgba(30,60,120,.16);padding:12px 16px;font-size:12.5px;text-align:center}
+.banner b{color:var(--red)} .banner.demo b{color:var(--amber)}
+.banner button{margin-top:8px;background:var(--blue);color:#fff;padding:7px 14px;border-radius:999px;font-weight:700}
+
+/* 3D primitives */
+.fl{position:absolute;background-color:#f9fbfe;background-image:linear-gradient(rgba(47,107,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(47,107,255,.045) 1px,transparent 1px);background-size:20px 20px;border:1px solid #e3e9f2;cursor:pointer}
+.fl.hot{background-color:#fff6f3;box-shadow:inset 0 0 50px rgba(240,68,56,.22)}
+.fl.hub{background-color:#f1f6ff}.fl.wait{background-color:#fff9f3}.fl.arch{background-color:#f2fbf6}
+.fl.sel{box-shadow:inset 0 0 0 3px rgba(47,107,255,.55),inset 0 0 40px rgba(47,107,255,.18)}
+.wt{position:absolute;left:0;top:0;height:38px;transform-origin:50% 0;transform:rotateX(90deg);background:linear-gradient(180deg,#e4ebf4,#fff);border:1px solid #d9e1ec;border-bottom:3px solid #fff}
+.wr{position:absolute;top:0;width:38px;transform-origin:0 50%;transform:rotateY(-90deg);background:linear-gradient(90deg,#dbe3ee,#f6f8fc);border:1px solid #d3dce8;border-right:3px solid #fff}
+.win{position:absolute;border-radius:3px;background:repeating-linear-gradient(90deg,rgba(150,190,240,.55) 0 30px,rgba(255,255,255,.9) 30px 33px)}
+.win.v{background:repeating-linear-gradient(180deg,rgba(150,190,240,.55) 0 30px,rgba(255,255,255,.9) 30px 33px)}
+.desk{position:absolute;height:28px;transform:translateZ(14px);background:#fff;border:1px solid #dde4ee;border-radius:3px}
+.desk.low{transform:translateZ(9px)}
+.dfront{position:absolute;left:-1px;right:-1px;top:100%;height:14px;transform-origin:50% 0;transform:rotateX(-90deg);background:linear-gradient(180deg,#e9eef5,#d6dfea)}
+.mon{position:absolute;top:2px;left:50%;width:30px;height:19px;margin-left:-15px;transform-origin:50% 0;transform:rotateX(90deg);border:2px solid #1f2a3d;border-radius:2px;background:#e2e8f0}
+.m-run{background:linear-gradient(#7ee6ff,#18b4d8);box-shadow:0 0 12px rgba(24,180,216,.75)}
+.m-todo{background:linear-gradient(#7fb0ff,#2f6bff);box-shadow:0 0 10px rgba(47,107,255,.6)}
+.m-me{background:linear-gradient(#fbbf24,#f59e0b);box-shadow:0 0 12px rgba(245,158,11,.7)}
+.m-ext{background:linear-gradient(#fdba74,#f97316);box-shadow:0 0 10px rgba(249,115,22,.6)}
+.shd{position:absolute;border-radius:6px;background:rgba(40,70,120,.10);filter:blur(3px)}
+.blk{position:absolute;top:2px;width:14px;height:14px;transform:translateZ(6px)}
+.av{position:absolute;width:28px;height:42px;left:-14px;top:-21px;display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.av .h{width:24px;height:24px;border-radius:50%;color:#fff;font:700 11px/24px var(--f);text-align:center;box-shadow:0 2px 4px rgba(20,40,80,.25)}
+.av .b{width:22px;height:16px;margin-top:2px;border-radius:9px 9px 4px 4px}
+.av.idle{opacity:.55}
+.av.work{animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-3px)}}
+.ring{position:absolute;border-radius:50%;transform:translateZ(1px);pointer-events:none}
+.ring.pulse{animation:pulse 2s ease-out infinite}
+@keyframes pulse{from{transform:translateZ(1px) scale(.8);opacity:1}to{transform:translateZ(1px) scale(1.5);opacity:0}}
+.path{position:absolute;border-radius:3px;transform:translateZ(1.5px);background-repeat:no-repeat;pointer-events:none}
+.k-run{background-color:var(--cyan);box-shadow:0 0 8px var(--cyan),0 0 18px rgba(24,180,216,.5)}
+.k-todo{background-color:var(--blue);box-shadow:0 0 8px #4c8dff,0 0 18px rgba(47,107,255,.45)}
+.k-me{background-color:var(--amber);box-shadow:0 0 8px var(--amber),0 0 18px rgba(245,158,11,.55)}
+.k-done{background-color:rgba(22,179,100,.65);box-shadow:0 0 8px rgba(22,179,100,.6)}
+.k-ext.h{background-image:repeating-linear-gradient(90deg,var(--orange) 0 10px,transparent 10px 18px);background-repeat:repeat}
+.k-ext.v{background-image:repeating-linear-gradient(180deg,var(--orange) 0 10px,transparent 10px 18px);background-repeat:repeat}
+.flow.h{background-image:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);background-size:36px 100%;animation:fx 1.8s linear infinite}
+.flow.v{background-image:linear-gradient(180deg,transparent,rgba(255,255,255,.95),transparent);background-size:100% 36px;animation:fy 1.8s linear infinite}
+@keyframes fx{from{background-position:-36px 0}to{background-position:calc(100% + 36px) 0}}
+@keyframes fy{from{background-position:0 -36px}to{background-position:0 calc(100% + 36px)}}
+.lb{position:absolute;display:flex;align-items:center;gap:9px;padding:7px 12px 7px 8px;height:48px;background:rgba(255,255,255,.95);border-radius:14px;box-shadow:0 10px 24px rgba(30,60,120,.16);white-space:nowrap;cursor:pointer;transform:translate(-50%,-50%);text-align:left}
+.lb:hover{box-shadow:0 10px 24px rgba(30,60,120,.22),0 0 0 2px rgba(47,107,255,.45)}
+.lb .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px;flex:none}
+.lb .t{font-size:13px;font-weight:700;line-height:1.2;display:block}
+.lb .s{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:5px;line-height:1.3}
+.lb .d{width:7px;height:7px;border-radius:50%;display:inline-block}
+.lb.alert{box-shadow:0 10px 24px rgba(240,68,56,.25),0 0 0 2px rgba(240,68,56,.35)}
+.lb.warnl{box-shadow:0 10px 24px rgba(245,158,11,.22),0 0 0 2px rgba(245,158,11,.4)}
+.stem{position:absolute;width:2px;left:-1px;top:0;pointer-events:none}
+.bub{position:absolute;left:-10px;top:-10px;min-width:20px;height:20px;padding:0 6px;border-radius:10px;font:700 11px/20px var(--f);color:#fff;text-align:center;box-shadow:0 2px 6px rgba(20,40,80,.2);white-space:nowrap}
+.tok{position:absolute;transform:translate(-50%,-50%);padding:4px 8px;border-radius:6px;font:700 10.5px/1.2 var(--f);white-space:nowrap;cursor:pointer;border:1.5px solid;box-shadow:0 4px 10px rgba(30,60,120,.15)}
+.tok.me{background:#fffbeb;border-color:var(--amber);color:#92400e}
+.tok.ext{background:#fff7ed;border-color:var(--orange);color:#9a3412}
+.plant{position:absolute;left:-15px;top:-20px;width:30px;height:40px}
+.nlogo{position:absolute;left:-16px;top:-16px;width:32px;height:32px;border-radius:9px;background:var(--ink);color:#fff;font:800 17px/32px var(--f);text-align:center;box-shadow:0 6px 16px rgba(15,27,45,.3);cursor:pointer}
+.sign{position:absolute;left:-92px;top:-17px;width:184px;height:34px;border-radius:8px;background:#fff;box-shadow:0 8px 20px rgba(30,60,120,.2);display:flex;align-items:center;justify-content:center;gap:8px;font:800 14px/1 var(--f);color:var(--blue-d);letter-spacing:.06em}
+
+.rcol{display:flex;flex-direction:column;gap:16px;min-width:0}
+.ov{border-radius:26px;padding:20px;background:linear-gradient(180deg,#5e9bff 0%,#9cc3ff 34%,#fff 66%);box-shadow:0 16px 40px rgba(47,107,255,.18);display:flex;flex-direction:column;min-height:404px}
+.ov .hd{display:flex;align-items:center;gap:8px;color:#fff;font-size:18px;font-weight:700}
+.gauge{position:relative;height:170px;margin-top:4px}
+.gauge svg{display:block;margin:0 auto;max-width:100%}
+.gauge .num{position:absolute;left:0;right:0;top:76px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.gauge .num b{font-size:54px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.gauge .num b small{font-size:26px;color:var(--muted)}
+.gauge .num span{font-size:13px;color:var(--ink2);margin-top:4px}
+.tri{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:auto}
+.tri button{border-radius:16px;background:#fff;padding:12px 10px;box-shadow:0 6px 16px rgba(40,70,130,.08);display:flex;flex-direction:column;gap:4px;text-align:left;min-width:0}
+.tri button:hover{box-shadow:0 6px 16px rgba(40,70,130,.08),0 0 0 2px rgba(47,107,255,.35)}
+.tri .l{font-size:12px;color:var(--muted)} .tri .n{font-size:26px;font-weight:800;line-height:1.1} .tri .s{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.cardx{border-radius:24px;background:var(--card);box-shadow:0 14px 34px rgba(40,70,130,.08);padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.cardx h2{margin:0;display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700}
+.chip{margin-left:auto;font-size:12px;font-weight:500;color:var(--muted);padding:5px 10px;border-radius:14px;border:1px solid var(--line);background:transparent}
+button.chip:hover{border-color:#b9c9ec}
+select.chip{appearance:none;-webkit-appearance:none;padding-right:24px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%235b6b80' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 9px center;max-width:190px;cursor:pointer}
+.chart{position:relative}
+.chart .tt{position:absolute;padding:5px 9px;border-radius:9px;background:#fff;box-shadow:0 6px 16px rgba(40,70,130,.14);font-size:11px;line-height:1.35;white-space:nowrap;pointer-events:none}
+.axis{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding:0 2px}
+.foot{font-size:10.5px;color:var(--faint)}
+
+.bottom{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.lrow{display:grid;grid-template-columns:22px 84px minmax(0,1fr) 42px 64px;gap:8px;align-items:center;font-size:12.5px;width:100%;text-align:left;padding:3px 0;border-radius:8px}
+.lrow:hover{background:#f3f6fc}
+.dotav{width:22px;height:22px;border-radius:50%;color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center}
+.bar{height:7px;border-radius:4px;background:#edf1f7;overflow:hidden}.bar i{display:block;height:100%;border-radius:4px}
+.num{font-variant-numeric:tabular-nums}
+.trow{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #eef2f7;width:100%;text-align:left}
+.trow:last-child{border-bottom:0}
+.trow:hover .tt1{color:var(--blue)}
+.trow .av30{width:30px;height:30px;border-radius:50%;color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+.tt1{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.tm{font-size:11px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{font-size:11px;font-weight:600;padding:3px 8px;border-radius:10px;white-space:nowrap}
+.p-me{background:#fee4e2;color:#b42318}.p-run{background:#d9f4fb;color:#0e6177}.p-todo{background:#e8efff;color:#1d4fd8}.p-ext{background:#ffedd5;color:#9a3412}.p-done{background:#dcf7e8;color:#0d6b3a}.p-stale{background:#fff4dc;color:#92400e}
+.chain{position:relative;display:flex;flex-direction:column;padding-left:4px}
+.chain .ln{position:absolute;left:14px;top:14px;bottom:18px;width:2px}
+.cnode{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;padding:4px 0;width:100%;text-align:left}
+.cnode .o{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;position:relative}
+.needs .big{border-radius:18px;background:linear-gradient(135deg,#ffe9e6,#fff3f1);padding:12px 14px;display:flex;align-items:center;gap:12px;width:100%;text-align:left}
+.needs .big .c{width:44px;height:44px;border-radius:50%;background:var(--red);display:grid;place-items:center;color:#fff;font-weight:800;font-size:20px;box-shadow:0 6px 14px rgba(240,68,56,.35);flex:none}
+.needs .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;flex:1}
+.needs .tiles button{border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:2px;text-align:left;min-width:0}
+.empty{color:var(--muted);font-size:12.5px;margin:6px 0}
+
+.scrim{position:fixed;inset:0;background:rgba(15,27,45,.18);z-index:30}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);z-index:31;background:#fff;box-shadow:-20px 0 50px rgba(40,70,130,.16);
+  padding:calc(24px + env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) 24px;display:flex;flex-direction:column;gap:18px;overflow:auto}
+.drawer.wide{width:min(560px,100%)}
+.drawer .top{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.drawer .x{margin-left:auto;width:36px;height:36px;border-radius:50%;background:#f1f4f9;display:grid;place-items:center;flex:none}
+.prof{display:flex;align-items:center;gap:16px}
+.prof .a{width:64px;height:64px;border-radius:50%;color:#fff;font-size:26px;font-weight:800;display:grid;place-items:center;box-shadow:0 0 0 4px #fff,0 0 0 6px rgba(47,107,255,.5);flex:none}
+.sect{display:flex;flex-direction:column;gap:8px}
+.sect>h3{margin:0;display:flex;justify-content:space-between;align-items:baseline;font-size:15px;font-weight:700}
+.sect>h3 span{font-size:12px;font-weight:500;color:var(--muted)}
+.tcard{border-radius:16px;border:1px solid var(--line);padding:13px 14px;display:flex;flex-direction:column;gap:6px}
+.tcard.me{border-color:#fdc9c3;background:#fff8f7}.tcard.run{border-color:#bfeaf5;background:#f5fcfe}.tcard.todo{border-color:#dbe5ff;background:#f6f9ff}.tcard.ext{border-color:#fde1c8;background:#fffaf5}.tcard.stale{border-color:#fde68a;background:#fffbeb}
+.tcard .r1{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.tcard .r1 .pill{margin-left:auto}
+.tcard b{font-size:14px;overflow-wrap:anywhere}
+.tcard p{margin:0;font-size:12.5px;color:var(--ink2);line-height:1.55;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tcard .lk{display:flex;gap:12px;font-size:12.5px;font-weight:600;flex-wrap:wrap}
+.split{display:flex;height:10px;border-radius:5px;overflow:hidden;background:#edf1f7}
+.lg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink2)}
+.lg span{display:flex;align-items:center;gap:5px} .lg i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.bars{display:grid;gap:6px;align-items:end;height:100px;padding:0 2px;border-bottom:1px solid var(--line)}
+.bars span{border-radius:4px 4px 0 0;position:relative;min-height:2px}
+.bars span b{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:11px}
+.drow{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #eef2f7}
+.cta{margin-top:auto;min-height:48px;border-radius:14px;background:var(--blue);color:#fff!important;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 10px 24px rgba(47,107,255,.3)}
+
+@media (max-width:1200px){
+  .main{grid-template-columns:68px minmax(0,1fr)}
+  .rcol{grid-column:2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bottom{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:760px){
+  .shell{padding:14px;border-radius:22px}
+  h1{font-size:32px}
+  .main{grid-template-columns:minmax(0,1fr)}
+  .rail{flex-direction:row;justify-content:space-around;padding:6px}
+  .rail button{width:44px;height:44px}
+  .rcol{grid-column:auto;display:flex}
+  .stage{height:420px}
+  .bottom{grid-template-columns:minmax(0,1fr)}
+  .user .nm{display:none} .user{padding:0 6px}
+  .hint{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .av.work,.ring.pulse,.flow.h,.flow.v{animation:none}
+}
+</style>
+
+<div class="shell" id="app">
+  <header>
+    <div class="logo">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="1" y="1" width="14" height="14" rx="4" fill="#2f6bff"/><rect x="19" y="1" width="14" height="14" rx="7" fill="#7fb0ff"/><rect x="1" y="19" width="14" height="14" rx="7" fill="#7fb0ff"/><rect x="19" y="19" width="14" height="14" rx="4" fill="#2f6bff"/></svg>
+      <b>Chloris <span>Agent HQ</span></b>
+    </div>
+    <div class="pillbox search">
+      <label><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f1b2d" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20 16 16"/></svg>
+      <input id="q" type="search" placeholder="搜索 agent、任务、项目…" aria-label="搜索 agent、任务、项目" autocomplete="off"></label>
+      <div class="sres" id="sres" hidden></div>
+    </div>
+    <div class="pillbox sel"><select id="proj" aria-label="按项目筛选"><option value="">全部项目</option></select><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0f1b2d" stroke-width="2.5" aria-hidden="true"><path d="M6 9 12 15 18 9"/></svg></div>
+    <div class="sp"></div>
+    <button class="ibtn" id="bell" aria-label="需要你处理的卡片"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0f1b2d" stroke-width="1.8" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg><span class="rd" id="bellDot" hidden></span></button>
+    <div class="pillbox user"><span class="e">E</span><span class="nm" style="display:flex;flex-direction:column;line-height:1.3"><b style="font-size:14px">Eric</b><span style="font-size:12px;color:var(--muted)">AI 应用负责人</span></span></div>
+  </header>
+
+  <div class="titlebar">
+    <div><h1>Agent <span>工作台</span></h1><p class="sub">从 agent 视角实时查看：谁在工作、在做什么、卡在哪、交给了谁</p></div>
+    <div class="tools">
+      <button class="ibtn" id="vReset" aria-label="重置视角" title="重置视角"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f1b2d" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg></button>
+      <button class="ibtn" id="vFlat" aria-label="切换俯视平面" aria-pressed="false" title="俯视平面"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f1b2d" stroke-width="1.8" aria-hidden="true"><path d="M12 3 21 8 12 13 3 8Z"/><path d="M3 13 12 18 21 13"/></svg></button>
+      <button class="ibtn" id="vIn" aria-label="放大"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f1b2d" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button class="ibtn" id="vOut" aria-label="缩小"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f1b2d" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+      <button class="live warn" id="live" title="立即从 Notion 刷新"><i></i><span id="liveTxt">连接中</span></button>
+    </div>
+  </div>
+
+  <div class="main">
+    <nav class="rail" aria-label="视图">
+      <button class="on" id="rFloor" aria-label="楼层总览" title="楼层总览"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f1b2d" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></button>
+      <button id="rAgents" aria-label="全部 agent" title="全部 agent"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f1b2d" stroke-width="1.8" aria-hidden="true"><rect x="5" y="8" width="14" height="11" rx="4"/><path d="M12 8V5M9 13h.01M15 13h.01"/><circle cx="12" cy="4" r="1"/></svg></button>
+      <button id="rTasks" aria-label="全部未完成任务" title="全部未完成任务"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f1b2d" stroke-width="1.8" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></button>
+      <button id="rNeeds" aria-label="需要你" title="需要你"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f1b2d" stroke-width="1.8" aria-hidden="true"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17h.01"/></svg></button>
+      <button id="rDone" aria-label="近 7 天交付" title="近 7 天交付"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f1b2d" stroke-width="1.8" aria-hidden="true"><path d="M5 20V12M12 20V5M19 20V9"/></svg></button>
+    </nav>
+
+    <div class="stage" id="stage">
+      <div class="plane" id="plane" role="img" aria-label="Agent HQ 楼层：每位 agent 一间工作室，中央是任务中枢，左侧是 Eric 决策台"></div>
+      <div class="ov3" id="ov3"></div>
+      <div class="legend">
+        <span><i style="background:var(--cyan)"></i>进行中</span><span><i style="background:var(--blue)"></i>已派待开工</span>
+        <span><i style="background:var(--amber)"></i>送来等你</span><span><i style="background:repeating-linear-gradient(90deg,var(--orange) 0 5px,transparent 5px 8px)"></i>等外部</span>
+        <span><i style="background:var(--green)"></i>交付归档</span><span><i style="width:12px;height:12px;border-radius:50%;background:#c7cfdb"></i>灰显＝空闲</span>
+      </div>
+      <div class="hint">拖动旋转 · 滚轮缩放 · 点房间看 agent</div>
+      <div class="tip" id="tip" hidden></div>
+      <div class="banner" id="banner" hidden></div>
+    </div>
+
+    <div class="rcol">
+      <section class="ov" aria-label="Agent 总览">
+        <div class="hd"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><rect x="5" y="8" width="14" height="11" rx="4"/><path d="M12 8V5M9 13h.01M15 13h.01"/></svg>Agent 总览</div>
+        <div class="gauge" id="gauge"></div>
+        <div class="tri" id="tri"></div>
+      </section>
+      <section class="cardx" aria-label="每日交付">
+        <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f1b2d" stroke-width="2" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>每日交付<span class="chip">近 11 天</span></h2>
+        <div class="chart" id="chart"></div>
+        <div class="axis" id="axis"></div>
+        <span class="foot" id="chartFoot"></span>
+      </section>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <section class="cardx" aria-label="Agent 负载"><h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2f6bff" stroke-width="2" aria-hidden="true"><rect x="5" y="8" width="14" height="11" rx="4"/><path d="M12 8V5M9 13h.01M15 13h.01"/></svg>Agent 负载<span class="chip">完成 / 全部</span></h2><div id="load" style="display:flex;flex-direction:column;gap:4px"></div></section>
+    <section class="cardx" aria-label="在手任务"><h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2f6bff" stroke-width="2" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>在手任务<button class="chip" id="openAll">全部</button></h2><div id="open"></div></section>
+    <section class="cardx" aria-label="交接链路"><h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2f6bff" stroke-width="2" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M6 8.5v7M8.5 18h7"/></svg>交接链路<select class="chip" id="chainSel" aria-label="选择交接链路"></select></h2><div id="chain"></div></section>
+    <section class="cardx needs" aria-label="需要你"><h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f04438" stroke-width="2" aria-hidden="true"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17h.01"/></svg>需要你</h2><div id="needs" style="display:flex;flex-direction:column;gap:10px;flex:1"></div></section>
+  </div>
+</div>
+<div id="drawerHost"></div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- data source: saved Notion views (no SQL quota) ---------- */
+const SERVER="Notion", TOOL="notion-query-data-sources";
+const WORK_VIEW="https://www.notion.so/ef0e2713ea3948cf8ef4cfa3844da223?v=8f1b3bd326cf4c5cb4c1061eca2bdb68";
+const PROJ_VIEW="https://www.notion.so/90b88827f5fe4b42a383c86dc34a93aa?v=22da8c9897c146cfb2940b372cd6aa1f";
+const viewQ=(url,cursor)=>({data:Object.assign({mode:"view",view_url:url,page_size:100},cursor?{start_cursor:cursor}:{})});
+const WORK_Q=viewQ(WORK_VIEW), PROJ_Q=viewQ(PROJ_VIEW);
+const NOTION_DB="https://app.notion.com/p/ef0e2713ea3948cf8ef4cfa3844da223";
+
+const AG={"Claude":{c:"#f08a4b",m:"C"},"Grok Bot":{c:"#3b82f6",m:"G"},"Chloris AI工作管理助手":{c:"#16b364",m:"管",s:"工作管理助手"},
+  "DeepSeek":{c:"#6d5df5",m:"D"},"资深工程师":{c:"#ef4c5a",m:"工"},"Odoo数据协同助手":{c:"#b05ad8",m:"O",s:"Odoo 助手"},"人工":{c:"#94a3b8",m:"人"},
+  "__eric__":{c:"#1f2a3d",m:"E",s:"Eric"}};
+const EXTRA=["#0ea5e9","#14b8a6","#a855f7","#eab308","#64748b"];
+const PLAT={claude:"Claude",grok_bot:"Grok Bot",deepseek_harness:"DeepSeek harness",manual:"人工"};
+const PLATC={claude:"#f08a4b",grok_bot:"#3b82f6",deepseek_harness:"#6d5df5",manual:"#94a3b8"};
+const ORD={"等我":0,"进行中":1,"等外部":2,"待办":3,"完成":4};
+const PCLS={"等我":"me","进行中":"run","等外部":"ext","待办":"todo","完成":"done"};
+const PLBL={"等我":"等你","进行中":"进行中","等外部":"等外部","待办":"待办","完成":"完成"};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pid=u=>{const m=String(u||"").match(/[0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);return m?m[0].replace(/-/g,"").toLowerCase():"";};
+const ts=s=>s?Date.parse(String(s).replace(" ","T")):NaN;
+const rel=v=>{if(!v)return[];if(Array.isArray(v))return v;try{return JSON.parse(v);}catch{return[];}};
+const cleanTitle=s=>{const t=String(s||"").replace(/^\s*(?:(?:[\[【][^\]】]{1,8}[\]】]|TK-\d+)\s*)+/i,"");return t||String(s||"")||"(无标题)";};
+const shortTitle=s=>{const i=s.indexOf("：");return i>0&&i<12?s.slice(i+1):s;};
+const DAY=864e5;
+const dayKey=d=>{const x=new Date(d);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");};
+const md=k=>String(k).slice(5,10).replace("-","/");
+const hm=t=>new Date(t).toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit"});
+function ago(t){if(isNaN(t))return"";const h=(Date.now()-t)/36e5;if(h<1)return Math.max(1,Math.round(h*60))+" 分钟";if(h<48)return Math.round(h)+" 小时";return Math.floor(h/24)+" 天";}
+function extractJSON(p){
+  if(p&&typeof p==="object")return p;
+  const s=String(p||""),i=s.indexOf("{");if(i<0)return null;let d=0,str=false,e=false;
+  for(let k=i;k<s.length;k++){const c=s[k];
+    if(str){if(e)e=false;else if(c==="\\")e=true;else if(c==='"')str=false;continue;}
+    if(c==='"')str=true;else if(c==="{")d++;else if(c==="}"){d--;if(!d){try{return JSON.parse(s.slice(i,k+1));}catch{return null;}}}}
+  return null;
+}
+const norm=r=>({url:r.url,key:pid(r.url),id:Number(r["任务ID"])||r["任务ID"],title:cleanTitle(r["标题"]),status:r["状态"]||"待办",agent:r["执行者"]||"未指派",
+  platform:r["平台"]||"",next:r["下一步/等待原因"]||"",review:r["需复核"]==="__YES__",verdict:r["复核结论"]||"",done:r["date:完成日期:start"]||"",
+  created:ts(r["创建时间"]),edited:ts(r["最后编辑时间"]),projects:rel(r["项目"]).map(pid),related:rel(r["关联任务"]).map(pid),summary:r["结果摘要"]||"",out:r["产出链接"]||""});
+
+let items=[],projNames={},isDemo=false,lastOk=0,projFilter="",extraIdx=0;
+function agentInfo(n){ if(!AG[n]){AG[n]={c:EXTRA[extraIdx++%EXTRA.length],m:String(n||"?").replace(/^Chloris\s*/,"").slice(0,1)};} return AG[n]; }
+const sname=n=>agentInfo(n).s||n;
+const light=c=>`color-mix(in srgb, ${c} 55%, white)`;
+const pname=k=>projNames[k]||"未归类";
+const live=()=>items.filter(t=>t.status!=="取消"&&(!projFilter||t.projects.includes(projFilter)));
+const isOpen=t=>t.status!=="完成";
+const isStale=t=>["进行中","等外部"].includes(t.status)&&Date.now()-t.edited>48*36e5;
+const inWeek=t=>t.status==="完成"&&t.done&&Date.now()-ts(t.done.slice(0,10)+"T00:00:00")<7*DAY;
+const needsRev=t=>t.review&&!t.verdict&&t.status==="完成";
+const byUrl=u=>items.find(t=>t.url===u);
+const openSort=(a,b)=>(ORD[a.status]-ORD[b.status])||((isStale(b)?1:0)-(isStale(a)?1:0))||a.edited-b.edited;
+function pillFor(t){ if(isStale(t)&&t.status==="进行中") return `<span class="pill p-stale">停滞 ${ago(t.edited)}</span>`; return `<span class="pill p-${PCLS[t.status]||"todo"}">${PLBL[t.status]||esc(t.status)}</span>`; }
+
+/* ---------- model ---------- */
+function model(){
+  const v=live(), agents=new Map();
+  v.forEach(t=>{ if(!agents.has(t.agent)) agents.set(t.agent,[]); agents.get(t.agent).push(t); });
+  const list=[...agents.entries()].map(([name,cs])=>{
+    const open=cs.filter(isOpen), cnt=s=>cs.filter(t=>t.status===s).length;
+    const me=cnt("等我"), run=cnt("进行中"), todo=cnt("待办"), ext=cnt("等外部"), done=cnt("完成");
+    const staleRun=cs.filter(t=>t.status==="进行中"&&isStale(t)).length;
+    let state="idle"; if(run) state=staleRun===run?"stale":"run"; else if(me) state="me"; else if(todo) state="todo"; else if(ext) state="ext";
+    return {name,cards:cs,open,me,run,todo,ext,done,state};
+  }).sort((a,b)=>b.open.length-a.open.length||b.cards.length-a.cards.length);
+  return {v,agents:list};
+}
+
+/* ---------- 3D floor ---------- */
+const R={A1:{x:0,y:0,w:250,h:180},A2:{x:250,y:0,w:250,h:180},A3:{x:500,y:0,w:260,h:180},B1:{x:0,y:180,w:210,h:190},B2:{x:210,y:180,w:330,h:190},
+  B3:{x:540,y:180,w:220,h:190},C1:{x:0,y:370,w:280,h:190},C2:{x:280,y:370,w:160,h:190},C3:{x:440,y:370,w:160,h:190},C4:{x:600,y:370,w:160,h:190}};
+const SLOT_ORDER=["C1","A1","C3","A3","A2","B3"];
+const room=(r,cls,attrs)=>{
+  const back=r.y===0, side=r.x+r.w===760;
+  return `<div class="fl ${cls||""}" ${attrs||""} style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px">`+
+    (back?`<div class="wt" style="width:${r.w}px;height:52px"><div class="win" style="left:14px;right:14px;top:14px;height:26px"></div></div>`:`<div class="wt" style="width:${r.w-56}px"></div>`)+
+    (side?`<div class="wr" style="left:${r.w}px;width:52px;height:${r.h}px"><div class="win v" style="top:14px;bottom:14px;left:14px;width:26px"></div></div>`:`<div class="wr" style="left:${r.w}px;height:${r.h-56}px"></div>`)+`</div>`;
+};
+const desk=(x,y,w,h,mon,low)=>`<div class="shd" style="left:${x-2}px;top:${y+2}px;width:${w+6}px;height:${h+6}px"></div><div class="desk${low?" low":""}" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px">${mon===null?"":`<div class="mon ${mon?"m-"+mon:""}"></div>`}<div class="dfront"${low?' style="height:9px"':""}></div></div>`;
+let OV=[];
+const bb=(x,y,z,inner,attrs)=>{OV.push({x,y,z,inner,attrs:attrs||""});return "";};
+const avatar=(name,cls)=>{const a=agentInfo(name);return `<div class="av ${cls||""}"><div class="h" style="background:${a.c}">${esc(a.m)}</div><div class="b" style="background:${light(a.c)}"></div></div>`;};
+const PLANT=`<svg class="plant" viewBox="0 0 30 40" aria-hidden="true"><path d="M9 28h12l-2 11H11z" fill="#e7ecf3"/><circle cx="15" cy="14" r="9" fill="#3fa34d"/><circle cx="8" cy="19" r="6" fill="#56b85f"/><circle cx="22" cy="19" r="6" fill="#2f8f3e"/><circle cx="15" cy="7" r="5" fill="#6cc96f"/></svg>`;
+function seg(x1,y1,x2,y2,k){
+  const flow=["run","todo","me"].includes(k)?" flow":"";
+  if(y1===y2){if(x1===x2)return"";const l=Math.min(x1,x2);return `<div class="path k-${k} h${flow}" style="left:${l-2}px;top:${y1-2}px;width:${Math.abs(x2-x1)+4}px;height:4px"></div>`;}
+  const t=Math.min(y1,y2);return `<div class="path k-${k} v${flow}" style="left:${x1-2}px;top:${t-2}px;width:4px;height:${Math.abs(y2-y1)+4}px"></div>`;
+}
+const poly=(pts,k)=>pts.slice(1).map((p,i)=>seg(pts[i][0],pts[i][1],p[0],p[1],k)).join("");
+function label(x,y,z,icon,ic,title,sub,dot,attrs,extra){
+  OV.push({x,y,z:z-6,stem:true,inner:`<div class="stem" style="background:linear-gradient(${dot},transparent)"></div>`,attrs:""});
+  return bb(x,y,z,`<button class="lb ${extra||""}" ${attrs}><span class="ic" style="background:${ic}">${icon}</span><span><span class="t">${esc(title)}</span><span class="s"><i class="d" style="background:${dot}"></i>${sub}</span></span></button>`);
+}
+function agentSub(a){
+  if(a.state==="stale"){const st=a.cards.filter(t=>t.status==="进行中"&&isStale(t)).sort((x,y)=>x.edited-y.edited)[0];return {t:`进行中 · ${ago(st.edited)}未动`,d:"var(--amber)",cls:"warnl"};}
+  const parts=[]; if(a.me)parts.push(a.me+" 等你"); if(a.run)parts.push(a.run+" 进行"); if(a.todo)parts.push(a.todo+" 待办"); if(a.ext)parts.push(a.ext+" 等外部");
+  const d={me:"var(--amber)",run:"var(--cyan)",todo:"var(--blue)",ext:"var(--orange)",idle:"#94a3b8"}[a.state];
+  if(!parts.length) return {t:`空闲 · ${a.done} 完成`,d};
+  if(parts.length===1) parts.push(a.done+" 完成");
+  return {t:parts.slice(0,2).join(" · "),d};
+}
+let selAgent=null;
+function buildFloor(M){
+  let h=""; OV=[];
+  h+=`<div style="position:absolute;left:-22px;top:-22px;width:804px;height:604px;border-radius:26px;background:#dde5f0;transform:translateZ(-14px);box-shadow:0 40px 70px rgba(40,70,130,.22)"></div>`+
+     `<div style="position:absolute;left:-8px;top:582px;width:790px;height:13px;background:#cfd9e6;transform-origin:50% 0;transform:rotateX(-90deg)"></div>`+
+     `<div style="position:absolute;left:-22px;top:-8px;width:13px;height:590px;background:#c4cfde;transform-origin:0 50%;transform:rotateY(90deg)"></div>`+
+     `<div style="position:absolute;left:-22px;top:-22px;width:804px;height:604px;border-radius:26px;background:#eef2f8;transform:translateZ(-.5px)"></div>`;
+  const shown=M.agents.slice(0,SLOT_ORDER.length), overflow=M.agents.slice(SLOT_ORDER.length), slots={};
+  shown.forEach((a,i)=>slots[SLOT_ORDER[i]]=a);
+  Object.keys(R).forEach(k=>{
+    if(k==="B1") h+=room(R[k],"hot",'data-zone="needs" data-tip="Eric 决策台：送来等你决定的卡"');
+    else if(k==="B2") h+=room(R[k],"hub",'data-zone="hub" data-tip="任务中枢：Notion 工作项库"');
+    else if(k==="C2") h+=room(R[k],"wait",'data-zone="ext" data-tip="外部等待区：等外部回复的卡"');
+    else if(k==="C4") h+=room(R[k],"arch",'data-zone="done" data-tip="交付归档：近 7 天完成的卡"');
+    else { const a=slots[k]; h+=room(R[k],a&&selAgent===a.name?"sel":"",a?`data-agent="${esc(a.name)}" data-tip="${esc(sname(a.name))} 的工作室"`:""); }
+  });
+  h+=`<div class="wt" style="top:560px;width:260px;height:12px"></div><div class="wt" style="left:470px;top:560px;width:290px;height:12px"></div><div class="wr" style="left:0;width:12px;height:560px"></div>`;
+  const meCards=M.v.filter(t=>t.status==="等我").sort((a,b)=>a.edited-b.edited);
+  h+=desk(55,255,100,30,meCards.length?"me":"");
+  h+=bb(105,236,21,avatar("__eric__"),'data-zone="needs" data-tip="Eric"');
+  h+=`<div class="ring" style="left:295px;top:195px;width:160px;height:160px;border:2px dashed rgba(47,107,255,.45)"></div>`+
+     `<div style="position:absolute;left:315px;top:215px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,#fff 0%,#dbe7ff 100%);border:2px solid #9db9ff;transform:translateZ(5px);box-shadow:0 0 30px rgba(47,107,255,.4);pointer-events:none">`+
+     [4,9,14].map((z,i)=>`<div style="position:absolute;left:43px;top:48px;width:34px;height:24px;background:${i===2?"#eaf1ff":"#fff"};border:1.5px solid ${i===2?"#2f6bff":"#7fa6ff"};border-radius:3px;transform:translateZ(${z}px)"></div>`).join("")+`</div>`;
+  h+=bb(375,275,52,`<div class="nlogo">N</div>`,'data-zone="hub" data-tip="任务中枢：Notion 工作项库"');
+  h+=desk(310,470,100,20,null,true);
+  const recent=M.v.filter(t=>t.status==="完成").sort((a,b)=>(ts(b.done)||b.edited)-(ts(a.done)||a.edited)).slice(0,15);
+  [405,450,495].forEach((y,row)=>{
+    const blocks=recent.slice(row*5,row*5+5).map((t,i)=>`<div class="blk" style="left:${6+i*18}px;background:${agentInfo(t.agent).c}"></div>`).join("");
+    h+=`<div class="desk" style="left:620px;top:${y}px;width:120px;height:18px">${blocks}<div class="dfront"></div></div>`;
+  });
+  const hubOut=[375,345]; let lane=0, meLane=0;
+  const queue=[[105,322],[62,336],[148,336],[84,356],[126,356]];
+  let qi=0; const carried=new Set();
+  shown.forEach((a,i)=>{
+    const r=R[SLOT_ORDER[i]], n=r.w>=260?3:r.w>=200?2:1, sp=r.w/n;
+    const monStatus=a.open.slice().sort(openSort).map(t=>PCLS[t.status]);
+    for(let d=0;d<n;d++){ const dx=Math.round(r.x+sp*d+(sp-60)/2), dy=r.y+72; h+=desk(dx,dy,60,28,monStatus[d]||""); }
+    const d0x=Math.round(r.x+(sp-60)/2)+30, d0y=r.y+72, front=d0y+40;
+    if(a.run||a.todo){ const y=hubOut[1]+lane*6; lane++; h+=poly([[hubOut[0],y],[d0x,y],[d0x,front]],a.run?"run":"todo"); }
+    if(a.ext){ h+=poly([[d0x,front],[d0x,538],[330,538],[330,500]],"ext"); }
+    if(a.me){ const x=180+meLane*5; meLane++; h+=poly([[d0x,front],[x,front],[x,322],[125,322]],"me"); }
+    const goEric=a.state==="me"&&qi<queue.length;
+    let ax=d0x, ay=d0y+48;
+    if(goEric){ [ax,ay]=queue[qi++]; carried.add(a.name); }
+    const cls={run:"work",idle:"idle"}[a.state]||"";
+    const ringC={run:"var(--cyan)",stale:"var(--amber)",me:"var(--amber)",todo:"var(--blue)"}[a.state];
+    if(ringC){ h+=`<div class="ring" style="left:${ax-24}px;top:${ay-24}px;width:48px;height:48px;border:2.5px ${a.state==="todo"?"dashed":"solid"} ${ringC}"></div>`;
+      if(a.state!=="todo") h+=`<div class="ring pulse" style="left:${ax-24}px;top:${ay-24}px;width:48px;height:48px;border:2px solid ${ringC}"></div>`; }
+    h+=bb(ax,ay,21,avatar(a.name,cls),`data-agent="${esc(a.name)}" data-tip="${esc(sname(a.name))}"`);
+    const bub={idle:["z","#94a3b8"],stale:["!","var(--amber)"],todo:[String(a.todo),"var(--blue)"],ext:["…","var(--orange)"]}[a.state];
+    if(bub) h+=bb(ax,ay,54,`<div class="bub" style="background:${bub[1]}">${bub[0]}</div>`);
+    const s=agentSub(a), ai=agentInfo(a.name);
+    h+=label(r.x+r.w/2,r.y+r.h/2,94,esc(ai.m),ai.c,sname(a.name),esc(s.t),s.d,`data-agent="${esc(a.name)}"`,s.cls||"");
+  });
+  // 等我 cards: first card of a carried agent rides with the avatar; the rest queue as tokens at the desk
+  const firstOf={}; meCards.forEach(t=>{ if(!firstOf[t.agent]) firstOf[t.agent]=t; });
+  let tq=0;
+  meCards.forEach(t=>{
+    if(carried.has(t.agent)&&firstOf[t.agent]===t){
+      const pos=queue[[...carried].indexOf(t.agent)]||queue[0];
+      h+=bb(pos[0],pos[1],46,`<div class="tok me" style="transform:translate(-20%,-120%)">TK-${esc(t.id)}</div>`,`data-u="${esc(t.url)}" data-tip="TK-${esc(t.id)} ${esc(t.title)}"`);
+    } else {
+      const p=[[70,300],[140,300],[105,292],[60,318],[150,318]][tq++%5];
+      h+=bb(p[0],p[1],24,`<div class="tok me">TK-${esc(t.id)}</div>`,`data-u="${esc(t.url)}" data-tip="TK-${esc(t.id)} ${esc(t.title)} · ${esc(sname(t.agent))}"`);
+    }
+  });
+  const ext=M.v.filter(t=>t.status==="等外部");
+  const ePos=[[340,478],[388,478],[364,512],[316,512],[412,512]];
+  ext.slice(0,5).forEach((t,i)=>{ h+=bb(ePos[i][0],ePos[i][1],28,`<div class="tok ext">TK-${esc(t.id)}</div>`,`data-u="${esc(t.url)}" data-tip="TK-${esc(t.id)} ${esc(t.title)}${t.next?" · "+esc(t.next.slice(0,40)):""}"`); });
+  if(M.v.some(inWeek)) h+=poly([[564,355],[722,355],[722,410]],"done");
+  const nRev=M.v.filter(needsRev).length, openN=M.v.filter(isOpen).length;
+  h+=label(105,275,94,"!","var(--red)","Eric 决策台",`${meCards.length} 等你 · ${nRev} 待复核`,"var(--red)",'data-zone="needs"',meCards.length?"alert":"");
+  h+=label(375,275,104,`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" aria-hidden="true"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg>`,"var(--blue)","任务中枢",`${M.v.length} 张 · ${openN} 未完成`,"var(--blue)",'data-zone="hub"');
+  h+=label(360,465,94,`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" aria-hidden="true"><path d="M7 3h10M7 21h10M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9"/></svg>`,"var(--orange)","外部等待区",`${ext.length} 等外部`,"var(--orange)",'data-zone="ext"');
+  h+=label(680,465,94,`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>`,"var(--green)","交付归档",`近 7 天 ${M.v.filter(inWeek).length} 张`,"var(--green)",'data-zone="done"');
+  if(overflow.length) h+=bb(650,215,60,`<div class="tok" style="background:#fff;border-color:#c7d3e6;color:#3c4a5e">另有 ${overflow.length} 位 agent</div>`,'data-zone="agents"');
+  [[226,150],[480,30],[738,150],[190,210],[520,350],[260,540],[742,540],[14,545]].forEach(p=>h+=bb(p[0],p[1],20,PLANT));
+  h+=bb(365,572,22,`<div class="sign"><svg width="16" height="16" viewBox="0 0 34 34" aria-hidden="true"><rect x="1" y="1" width="14" height="14" rx="4" fill="#2f6bff"/><rect x="19" y="1" width="14" height="14" rx="7" fill="#7fb0ff"/><rect x="1" y="19" width="14" height="14" rx="7" fill="#7fb0ff"/><rect x="19" y="19" width="14" height="14" rx="4" fill="#2f6bff"/></svg>CHLORIS AGENT HQ</div>`);
+  $("plane").innerHTML=h;
+  $("ov3").innerHTML=OV.map((o,i)=>`<div class="ob${o.stem?" st":""}" data-i="${i}" ${o.attrs}>${o.inner}</div>`).join("");
+  positionOverlay();
+}
+function project(px,py,pz){
+  const st=$("stage"), rx=(view.flat?0:view.rx)*Math.PI/180, rz=(view.flat?0:view.rz)*Math.PI/180, s=view.fit*view.zoom*(view.flat?.86:1);
+  const X=px-380, Y=py-280, x1=X*Math.cos(rz)-Y*Math.sin(rz), y1=X*Math.sin(rz)+Y*Math.cos(rz);
+  const y2=y1*Math.cos(rx)-pz*Math.sin(rx), z2=y1*Math.sin(rx)+pz*Math.cos(rx);
+  return [st.clientWidth/2+s*x1, st.clientHeight/2+34+s*y2, z2*s];
+}
+function positionOverlay(){
+  const els=$("ov3").children, ls=Math.min(1,Math.max(.7,view.fit*view.zoom));
+  for(const el of els){ const o=OV[+el.dataset.i]; if(!o)continue;
+    if(o.stem){ const a=project(o.x,o.y,0), b=project(o.x,o.y,o.z); el.style.transform=`translate(${a[0]}px,${b[1]}px)`; el.firstChild.style.height=Math.max(0,a[1]-b[1])+"px"; el.style.zIndex=Math.round(b[2]+2000); continue; }
+    const p=project(o.x,o.y,o.z); el.style.transform=`translate(${p[0].toFixed(1)}px,${p[1].toFixed(1)}px) scale(${ls.toFixed(3)})`; el.style.zIndex=Math.round(p[2]+2000+(o.z>60?600:0));
+  }
+}
+
+/* ---------- view control ---------- */
+const view={rx:56,rz:-36,zoom:1,flat:false,fit:1};
+function applyView(){
+  const st=$("stage"), w=st.clientWidth, hgt=st.clientHeight;
+  view.fit=Math.max(.42,Math.min(1.25,Math.min(w/1010,hgt/640)));
+  const rs=document.documentElement.style;
+  rs.setProperty("--rx",(view.flat?0:view.rx)+"deg"); rs.setProperty("--rz",(view.flat?0:view.rz)+"deg");
+  rs.setProperty("--s",(view.fit*view.zoom*(view.flat?.86:1)).toFixed(3));
+  positionOverlay();
+}
+new ResizeObserver(applyView).observe($("stage"));
+$("vReset").onclick=()=>{view.rx=56;view.rz=-36;view.zoom=1;view.flat=false;$("vFlat").setAttribute("aria-pressed","false");applyView();};
+$("vFlat").onclick=()=>{view.flat=!view.flat;$("vFlat").setAttribute("aria-pressed",String(view.flat));applyView();};
+$("vIn").onclick=()=>{view.zoom=Math.min(1.8,view.zoom*1.15);applyView();};
+$("vOut").onclick=()=>{view.zoom=Math.max(.6,view.zoom/1.15);applyView();};
+(function(){
+  const st=$("stage"); let drag=null;
+  st.addEventListener("pointerdown",e=>{ if(e.button!==0)return; drag={x:e.clientX,y:e.clientY,rx:view.rx,rz:view.rz,moved:false,target:e.target}; });
+  window.addEventListener("pointermove",e=>{
+    if(drag){ const dx=e.clientX-drag.x, dy=e.clientY-drag.y;
+      if(!drag.moved&&Math.hypot(dx,dy)>5){drag.moved=true;st.classList.add("drag");}
+      if(drag.moved&&!view.flat){ view.rz=Math.max(-75,Math.min(-5,drag.rz+dx*.25)); view.rx=Math.max(30,Math.min(68,drag.rx-dy*.2)); applyView(); } }
+    const tip=$("tip"); if(drag&&drag.moved){tip.hidden=true;return;}
+    const el=e.target&&e.target.closest&&e.target.closest("[data-tip]");
+    if(!el||!st.contains(el)){tip.hidden=true;return;}
+    const r=st.getBoundingClientRect(); tip.textContent=el.getAttribute("data-tip"); tip.hidden=false;
+    tip.style.left=Math.max(4,Math.min(e.clientX-r.left+14,r.width-290))+"px"; tip.style.top=(e.clientY-r.top+14)+"px";
+  });
+  window.addEventListener("pointerup",()=>{
+    if(!drag)return; const d=drag; drag=null; st.classList.remove("drag");
+    if(d.moved) return;
+    const t=d.target&&d.target.closest&&d.target.closest("[data-agent],[data-zone],[data-u]"); if(!t||!st.contains(t))return;
+    if(t.dataset.u){const c=byUrl(t.dataset.u); if(c) openAgent(c.agent,c.url);}
+    else if(t.dataset.agent) openAgent(t.dataset.agent);
+    else openZone(t.dataset.zone);
+  });
+  st.addEventListener("pointerleave",()=>{$("tip").hidden=true;});
+  st.addEventListener("wheel",e=>{e.preventDefault();view.zoom=Math.max(.6,Math.min(1.8,view.zoom*(e.deltaY<0?1.08:1/1.08)));applyView();},{passive:false});
+  st.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ const t=e.target.closest&&e.target.closest("[data-agent],[data-zone]"); if(t){e.preventDefault(); t.dataset.agent?openAgent(t.dataset.agent):openZone(t.dataset.zone);} } });
+})();
+
+/* ---------- right column ---------- */
+function renderOverview(M){
+  const total=M.agents.length, busy=M.agents.filter(a=>a.open.length).length, frac=total?busy/total:0;
+  const P=a=>{const ang=Math.PI*(1-a);return [144+110*Math.cos(ang),150-110*Math.sin(ang)];};
+  const [ex,ey]=P(frac), [cx,cy]=P(Math.max(0,frac-.035));
+  $("gauge").innerHTML=`<svg width="288" height="170" viewBox="0 0 288 170" aria-hidden="true"><path d="M34 150 A110 110 0 0 1 254 150" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="22" stroke-dasharray="2.2 3.2"/>`+
+    (frac>0?`<path d="M34 150 A110 110 0 0 1 ${ex.toFixed(1)} ${ey.toFixed(1)}" fill="none" stroke="#1f5eff" stroke-width="22" stroke-dasharray="2.2 3.2"/><path d="M${cx.toFixed(1)} ${cy.toFixed(1)} A110 110 0 0 1 ${ex.toFixed(1)} ${ey.toFixed(1)}" fill="none" stroke="#16b364" stroke-width="22" stroke-dasharray="2.2 3.2"/>`:"")+
+    `</svg><div class="num"><b>${busy}<small>/${total}</small></b><span>有任务在手的 agent</span></div>`;
+  const open=M.v.filter(isOpen), wk=M.v.filter(inWeek), rev=M.v.filter(needsRev), t=Date.now();
+  $("tri").innerHTML=`<button data-open="open"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2f6bff" stroke-width="2" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 10h8M8 14h5"/></svg><span class="l">未完成任务</span><span class="n">${open.length}</span><span class="s">进行 ${M.v.filter(x=>x.status==="进行中").length} · 等你 ${M.v.filter(x=>x.status==="等我").length}</span></button>`+
+    `<button data-open="done"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16b364" stroke-width="2.2" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg><span class="l">近 7 天完成</span><span class="n">${wk.length}</span><span class="s">${md(dayKey(t-6*DAY))} – ${md(dayKey(t))}</span></button>`+
+    `<button data-open="rev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6d5df5" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span class="l">待复核</span><span class="n">${rev.length}</span><span class="s">已完成未下结论</span></button>`;
+}
+function dailyDone(cards,days){
+  const t=Date.now(), keys=[...Array(days)].map((_,i)=>dayKey(t-(days-1-i)*DAY)), m={};
+  keys.forEach(k=>m[k]=[]); let undated=0;
+  cards.forEach(c=>{ if(c.status!=="完成")return; if(!c.done){undated++;return;} const k=c.done.slice(0,10); if(m[k])m[k].push(c); });
+  return {keys,vals:keys.map(k=>m[k].length),byDay:m,undated};
+}
+function renderChart(M){
+  const D=dailyDone(M.v,11), max=Math.max(4,...D.vals), W=292, H=132, x=i=>8+i*27, y=v=>116-v*(102/max);
+  const pts=D.vals.map((v,i)=>[x(i),y(v)]);
+  const line=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+  let mi=0; D.vals.forEach((v,i)=>{if(v>=D.vals[mi])mi=i;});
+  const peak=D.vals[mi]; let tipHtml="";
+  if(peak>0){ const cs=D.byDay[D.keys[mi]], cnt={}; cs.forEach(c=>{const p=pname(c.projects[0]);cnt[p]=(cnt[p]||0)+1;});
+    const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0]; const note=top&&top[1]*2>=cs.length&&top[0]!=="未归类"?`多为 ${esc(top[0])}`:"";
+    const lx=Math.max(0,Math.min(W-130,x(mi)-80)); tipHtml=`<div class="tt" style="left:${lx}px;top:${Math.max(-4,y(peak)-46)}px"><b style="font-size:12px">${peak} 张</b> · ${md(D.keys[mi])}${note?`<br><span style="color:var(--muted)">${note}</span>`:""}</div>`; }
+  $("chart").innerHTML=`<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="近 11 天每日完成的工作项数：${D.vals.join("、")}">
+    <defs><linearGradient id="ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f6bff" stop-opacity=".28"/><stop offset="1" stop-color="#2f6bff" stop-opacity="0"/></linearGradient></defs>
+    <path d="M0 116H${W}M0 82H${W}M0 48H${W}M0 14H${W}" stroke="#edf1f7"/>
+    <path d="${line} L${x(10)} 116 L8 116 Z" fill="url(#ar)"/><path d="${line}" fill="none" stroke="#2f6bff" stroke-width="2.4" stroke-linejoin="round"/>
+    ${pts.map((p,i)=>i===mi&&peak?`<path d="M${p[0]} ${p[1]}V116" stroke="#2f6bff" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="${p[0]}" cy="${p[1]}" r="5.5" fill="#2f6bff" stroke="#fff" stroke-width="2.5"/>`:`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="#fff" stroke="#2f6bff" stroke-width="2"/>`).join("")}
+  </svg>${tipHtml}`;
+  $("axis").innerHTML=[0,2,4,6,8,10].map(i=>`<span>${md(D.keys[i])}</span>`).join("");
+  const und=M.v.filter(c=>c.status==="完成"&&!c.done);
+  $("chartFoot").textContent="按完成日期计"+(und.length?`；${und.slice(0,3).map(c=>"TK-"+c.id).join("、")}${und.length>3?" 等":""} 未填完成日期，未计入`:"");
+}
+
+/* ---------- bottom cards ---------- */
+function agentStatusText(a){
+  if(a.me) return [a.me+" 等你","#b45309"]; if(a.state==="stale") return ["停滞","#b45309"]; if(a.run) return [a.run+" 进行中","#0e7490"];
+  if(a.open.length) return [a.open.length+" 未完成","#1d4fd8"]; return ["空闲","var(--faint)"];
+}
+function renderLoad(M){
+  $("load").innerHTML=M.agents.map(a=>{const ai=agentInfo(a.name),[st,sc]=agentStatusText(a),pct=a.cards.length?a.done/a.cards.length*100:0;
+    return `<button class="lrow" data-agent="${esc(a.name)}"><span class="dotav" style="background:${ai.c}">${esc(ai.m)}</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(sname(a.name))}</span><span class="bar"><i style="width:${pct}%;background:${ai.c}"></i></span><span class="num">${a.done}/${a.cards.length}</span><span style="color:${sc};font-size:11.5px">${st}</span></button>`;}).join("")||`<p class="empty">还没有工作项</p>`;
+}
+function trow(t){ const ai=agentInfo(t.agent);
+  const meta=t.status==="进行中"&&isStale(t)?`${ago(t.edited)}未更新`:t.status==="完成"?(t.done?md(t.done):"已完成"):(t.next?t.next.slice(0,40):`${ago(t.edited)}前更新`);
+  return `<button class="trow" data-u="${esc(t.url)}"><span class="av30" style="background:${ai.c}">${esc(ai.m)}</span><span style="min-width:0"><span class="tt1">${esc(t.title)}</span><span class="tm">TK-${esc(t.id)} · ${esc(sname(t.agent))} · ${esc(meta)}</span></span>${pillFor(t)}</button>`; }
+function renderOpen(M){
+  const o=M.v.filter(isOpen).sort(openSort);
+  $("openAll").textContent=o.length+" 张 · 全部";
+  $("open").innerHTML=o.slice(0,4).map(trow).join("")||`<p class="empty">没有未完成的卡，所有 agent 都已收工</p>`;
+}
+let chains=[],chainIdx=0;
+function computeChains(M){
+  const byKey=new Map(M.v.map(t=>[t.key,t])), adj=new Map();
+  M.v.forEach(t=>t.related.forEach(k=>{ if(!byKey.has(k)||k===t.key)return; [[t.key,k],[k,t.key]].forEach(([a,b])=>{if(!adj.has(a))adj.set(a,new Set());adj.get(a).add(b);}); }));
+  const hub=k=>(adj.get(k)||new Set()).size>6, seen=new Set(), out=[];
+  M.v.forEach(t=>{ if(seen.has(t.key)||hub(t.key)||!adj.has(t.key))return;
+    const comp=[],st=[t.key]; seen.add(t.key);
+    while(st.length){const k=st.pop();comp.push(byKey.get(k));(adj.get(k)||[]).forEach(n=>{if(!seen.has(n)&&!hub(n)&&byKey.has(n)){seen.add(n);st.push(n);}});}
+    if(comp.length>=2) out.push(comp.sort((a,b)=>a.id-b.id));
+  });
+  out.sort((a,b)=>(Number(b.some(isOpen))-Number(a.some(isOpen)))||Math.max(...b.map(c=>c.edited))-Math.max(...a.map(c=>c.edited)));
+  chains=out.slice(0,8); if(chainIdx>=chains.length) chainIdx=0;
+}
+function renderChain(){
+  const sel=$("chainSel");
+  sel.innerHTML=chains.map((c,i)=>{const o=c[0].title.split("：")[0];return `<option value="${i}"${i===chainIdx?" selected":""}>${esc(o.length<10?o:"链路")} · TK-${c[0].id}–${c[c.length-1].id}</option>`;}).join("")||`<option>暂无</option>`;
+  sel.disabled=!chains.length;
+  const c=chains[chainIdx];
+  if(!c){$("chain").innerHTML=`<p class="empty">还没有用「关联任务」连起来的卡</p>`;return;}
+  const nodes=c.length>5?c.slice(-5):c, doneN=nodes.filter(t=>t.status==="完成").length, pct=Math.round(doneN/nodes.length*100);
+  $("chain").innerHTML=`<div class="chain"><div class="ln" style="background:linear-gradient(var(--green) 0 ${pct}%,#c7d3e6 ${pct}%)"></div>${nodes.map(t=>{
+    const d=t.status==="完成", plat=PLAT[t.platform]||t.platform;
+    const right=d?(t.done?md(t.done):`<span style="color:var(--faint)">未填日期</span>`):pillFor(t);
+    return `<button class="cnode" data-u="${esc(t.url)}"><span class="o" style="${d?"background:var(--green)":"background:#fff;border:2px solid var(--blue);box-sizing:border-box"}">${d?`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>`:""}</span><span style="min-width:0"><span class="tt1">TK-${esc(t.id)} ${esc(shortTitle(t.title))}</span><span class="tm">${esc(sname(t.agent))}${plat?" @ "+esc(plat):""}</span></span><span style="font-size:11px;color:var(--muted)">${right}</span></button>`;}).join("")}</div>`+
+    (c.length>5?`<span class="foot">链路共 ${c.length} 张，显示最近 5 张</span>`:"");
+}
+$("chainSel").onchange=e=>{chainIdx=Number(e.target.value)||0;renderChain();};
+function renderNeeds(M){
+  const me=M.v.filter(t=>t.status==="等我").sort((a,b)=>a.edited-b.edited), rev=M.v.filter(needsRev), stale=M.v.filter(t=>isOpen(t)&&isStale(t)), ext=M.v.filter(t=>t.status==="等外部");
+  const wait=me.length?Math.floor((Date.now()-me[0].edited)/DAY):0;
+  $("bellDot").hidden=!me.length;
+  $("needs").innerHTML=`<button class="big" data-open="me"><span class="c">!</span><span style="display:flex;flex-direction:column"><span style="font-size:12px;color:#7a271a">等你决定</span><span style="font-size:28px;font-weight:800;line-height:1.1">${me.length} <span style="font-size:12px;font-weight:500;color:#7a271a">张</span></span></span>`+
+    (me.length?`<span style="width:1px;align-self:stretch;background:rgba(240,68,56,.2);margin:0 4px"></span><span style="display:flex;flex-direction:column;min-width:0"><span style="font-size:12px;color:#7a271a">最久已等</span><span style="font-size:22px;font-weight:800;line-height:1.2">${wait<1?"不到 1 天":wait+" 天"}</span><span style="font-size:11px;color:#7a271a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">TK-${esc(me[0].id)} · ${esc(sname(me[0].agent))}</span></span>`:`<span style="font-size:12.5px;color:#7a271a">现在没有卡等你拍板</span>`)+`</button>`+
+    `<div class="tiles"><button data-open="rev" style="background:#f2f0ff"><span style="font-size:12px;color:#4c3fb8">待复核</span><span style="font-size:30px;font-weight:800;color:#5b47d6;line-height:1.1">${rev.length}</span><span style="font-size:10.5px;color:#4c3fb8">已完成未下结论</span></button>`+
+    `<button data-open="stale" style="background:#fff6e5"><span style="font-size:12px;color:#92400e">停滞</span><span style="font-size:30px;font-weight:800;color:#b45309;line-height:1.1">${stale.length}</span><span style="font-size:10.5px;color:#92400e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${stale.length?esc(stale.slice(0,3).map(t=>"TK-"+t.id).join("、")):"超 48 小时未动"}</span></button>`+
+    `<button data-open="ext" style="background:#fff1e8"><span style="font-size:12px;color:#9a3412">等外部</span><span style="font-size:30px;font-weight:800;color:#c2410c;line-height:1.1">${ext.length}</span><span style="font-size:10.5px;color:#9a3412;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ext.length?esc(sname(ext[0].agent)):"没有"}</span></button></div>`;
+}
+
+/* ---------- drawers ---------- */
+let drawerOpen=false, lastFocus=null;
+function showDrawer(html,wide){
+  if(!drawerOpen) lastFocus=document.activeElement; drawerOpen=true;
+  $("drawerHost").innerHTML=`<div class="scrim" id="scrim"></div><aside class="drawer${wide?" wide":""}" role="dialog" aria-modal="true" aria-label="详情">${html}</aside>`;
+  $("scrim").onclick=closeDrawer; const x=$("drawerHost").querySelector(".x"); if(x){x.onclick=closeDrawer;x.focus();}
+}
+function closeDrawer(){ drawerOpen=false; $("drawerHost").innerHTML=""; if(selAgent){selAgent=null;rerenderFloor();} if(lastFocus&&lastFocus.focus)try{lastFocus.focus();}catch{} }
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&drawerOpen){closeDrawer();} });
+const topBar=label=>`<div class="top">${label}<button class="x" aria-label="关闭"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0f1b2d" stroke-width="2.4" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>`;
+function tcard(t,hl){
+  const cls=t.status==="进行中"&&isStale(t)?"stale":PCLS[t.status];
+  const body=t.status==="完成"?(t.summary||t.next):t.next;
+  const out=String(t.out||"").split(/\s/).find(s=>/^https?:/.test(s));
+  return `<div class="tcard ${cls}"${hl?' style="box-shadow:0 0 0 2px var(--blue)"':""}><div class="r1"><span>TK-${esc(t.id)}</span><span>${esc(sname(t.agent))}${t.platform?" @ "+esc(PLAT[t.platform]||t.platform):""}</span>${pillFor(t)}</div><b>${esc(t.title)}</b>${body?`<p>${esc(body)}</p>`:""}<div class="lk">${t.url&&!isDemo?`<a href="${esc(t.url)}" target="_blank" rel="noopener">在 Notion 打开 ↗</a>`:""}${out&&!isDemo?`<a href="${esc(out)}" target="_blank" rel="noopener">产出 ↗</a>`:""}<span style="margin-left:auto;font-weight:400;color:var(--muted)">${ago(t.edited)}前更新</span></div></div>`;
+}
+function openAgent(name,focusUrl){
+  const M=model(), a=M.agents.find(x=>x.name===name); if(!a)return;
+  selAgent=name; rerenderFloor();
+  const ai=agentInfo(name), pc={}; a.cards.forEach(t=>{const k=t.platform||"other";pc[k]=(pc[k]||0)+1;});
+  const pe=Object.entries(pc).sort((x,y)=>y[1]-x[1]);
+  const D=dailyDone(a.cards,14), mx=Math.max(1,...D.vals), passed=a.cards.filter(t=>t.verdict==="通过").length;
+  const recent=a.cards.filter(t=>t.status==="完成").sort((x,y)=>(ts(y.done)||y.edited)-(ts(x.done)||x.edited)).slice(0,3);
+  const pills=[["等我","p-me"],["进行中","p-run"],["等外部","p-ext"],["待办","p-todo"]].map(([s,c])=>{const n=a.cards.filter(t=>t.status===s).length;return n?`<span class="pill ${c}">${n} ${PLBL[s]}</span>`:"";}).join("")||`<span class="pill p-done">空闲</span>`;
+  const projCount={}; a.cards.forEach(t=>{const p=pname(t.projects[0]);projCount[p]=(projCount[p]||0)+1;}); const mainProj=Object.entries(projCount).sort((x,y)=>y[1]-x[1])[0];
+  showDrawer(topBar("Agent 详情")+
+    `<div class="prof"><div class="a" style="background:${ai.c}">${esc(ai.m)}</div><div style="display:flex;flex-direction:column;gap:4px;min-width:0"><b style="font-size:22px">${esc(sname(name))}</b><span style="font-size:13px;color:var(--muted)">${mainProj&&mainProj[0]!=="未归类"?"主要在 "+esc(mainProj[0])+" · ":""}共 ${a.cards.length} 张卡</span><span style="display:flex;gap:6px;flex-wrap:wrap">${pills}</span></div></div>`+
+    `<section class="sect"><h3>运行平台<span>按卡数</span></h3><div class="split">${pe.map(([k,n])=>`<span style="width:${n/a.cards.length*100}%;background:${PLATC[k]||"#94a3b8"}"></span>`).join("")}</div><div class="lg">${pe.map(([k,n])=>`<span><i style="background:${PLATC[k]||"#94a3b8"}"></i>${esc(PLAT[k]||"未填平台")} ${n}</span>`).join("")}</div></section>`+
+    `<section class="sect"><h3>在手任务<span>${a.open.length} 张</span></h3>${a.open.slice().sort(openSort).map(t=>tcard(t,t.url===focusUrl)).join("")||`<p class="empty">手上没有未完成的卡</p>`}</section>`+
+    `<section class="sect"><h3>近两周交付<span>${D.vals.reduce((x,y)=>x+y,0)} 张${passed?` · ${passed} 张复核通过`:""}</span></h3><div class="bars" style="grid-template-columns:repeat(14,minmax(0,1fr))">${D.vals.map(v=>`<span style="height:${v?Math.max(8,v/mx*90):2}px;background:${v?ai.c:"#e3e9f2"}">${v===mx&&v>0?`<b>${v}</b>`:""}</span>`).join("")}</div><div class="axis"><span>${md(D.keys[0])}</span><span>${md(D.keys[7])}</span><span>${md(D.keys[13])}</span></div>${D.undated?`<span class="foot">${D.undated} 张未填完成日期，未画入</span>`:""}</section>`+
+    `<section class="sect"><h3>最近交付</h3>${recent.map(t=>`<div class="drow"><span style="width:22px;height:22px;border-radius:50%;background:var(--green);display:grid;place-items:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></span><span style="min-width:0"><span class="tt1">TK-${esc(t.id)} ${esc(t.title)}</span><span class="tm">${esc(PLAT[t.platform]||t.platform||"")}${t.verdict?" · 复核"+esc(t.verdict):t.review?" · 待复核":""}</span></span><span style="font-size:11px;color:var(--muted)">${t.done?md(t.done):"未填日期"}</span></div>`).join("")||`<p class="empty">还没有完成的卡</p>`}</section>`+
+    (isDemo?"":`<a class="cta" href="${NOTION_DB}" target="_blank" rel="noopener">在 Notion 打开工作项库</a>`));
+}
+function listDrawer(title,sub,cards,emptyTxt){
+  showDrawer(topBar(esc(title))+`<div class="sect"><h3>${esc(title)}<span>${esc(sub)}</span></h3>${cards.map(t=>tcard(t)).join("")||`<p class="empty">${esc(emptyTxt)}</p>`}</div>`,true);
+}
+function openZone(z){
+  const M=model(), v=M.v;
+  if(z==="needs"||z==="me"){
+    const me=v.filter(t=>t.status==="等我").sort((a,b)=>a.edited-b.edited), stale=v.filter(t=>isOpen(t)&&isStale(t)), rev=v.filter(needsRev);
+    showDrawer(topBar("需要你")+`<div class="sect"><h3>等你决定<span>${me.length} 张</span></h3>${me.map(t=>tcard(t)).join("")||`<p class="empty">现在没有卡等你拍板</p>`}</div>`+
+      `<div class="sect"><h3>停滞<span>超 48 小时未更新</span></h3>${stale.map(t=>tcard(t)).join("")||`<p class="empty">没有停滞的卡</p>`}</div>`+
+      `<div class="sect"><h3>待复核<span>${rev.length} 张</span></h3>${rev.map(t=>tcard(t)).join("")||`<p class="empty">都已复核</p>`}</div>`,true);
+  }
+  else if(z==="hub"||z==="open") listDrawer("未完成任务",`${v.filter(isOpen).length} 张`,v.filter(isOpen).sort(openSort),"没有未完成的卡");
+  else if(z==="ext") listDrawer("等外部",`${v.filter(t=>t.status==="等外部").length} 张`,v.filter(t=>t.status==="等外部"),"没有等外部的卡");
+  else if(z==="stale") listDrawer("停滞","超 48 小时未更新",v.filter(t=>isOpen(t)&&isStale(t)),"没有停滞的卡");
+  else if(z==="rev") listDrawer("待复核","勾了需复核、还没有复核结论",v.filter(needsRev),"都已复核");
+  else if(z==="done") listDrawer("近 7 天交付","按完成日期",v.filter(inWeek).sort((a,b)=>ts(b.done)-ts(a.done)),"近 7 天没有完成的卡");
+  else if(z==="agents"){
+    showDrawer(topBar("全部 agent")+`<div class="sect">${M.agents.map(a=>{const ai=agentInfo(a.name),[st,sc]=agentStatusText(a);return `<button class="trow" data-agent="${esc(a.name)}"><span class="av30" style="background:${ai.c}">${esc(ai.m)}</span><span style="min-width:0"><span class="tt1">${esc(sname(a.name))}</span><span class="tm">${a.cards.length} 张卡 · 完成 ${a.done}</span></span><span style="font-size:12px;color:${sc}">${st}</span></button>`;}).join("")||`<p class="empty">还没有 agent</p>`}</div>`);
+  }
+}
+document.addEventListener("click",e=>{
+  if(e.target.closest("#stage"))return;
+  const o=e.target.closest("[data-open]"); if(o){openZone(o.dataset.open);return;}
+  const a=e.target.closest("[data-agent]"); if(a){$("sres").hidden=true;openAgent(a.dataset.agent);return;}
+  const u=e.target.closest("[data-u]"); if(u){const c=byUrl(u.dataset.u); $("sres").hidden=true; if(c) openAgent(c.agent,c.url); return;}
+});
+$("openAll").onclick=e=>{e.stopPropagation();openZone("open");};
+$("bell").onclick=()=>openZone("needs");
+$("rAgents").onclick=()=>openZone("agents"); $("rTasks").onclick=()=>openZone("open"); $("rNeeds").onclick=()=>openZone("needs"); $("rDone").onclick=()=>openZone("done");
+$("rFloor").onclick=()=>{ $("stage").scrollIntoView({behavior:"smooth",block:"center"}); };
+
+/* ---------- search + project filter ---------- */
+$("q").addEventListener("input",()=>{
+  const q=$("q").value.trim().toLowerCase(), box=$("sres"); if(!q){box.hidden=true;return;}
+  const M=model();
+  const ags=M.agents.filter(a=>(a.name+sname(a.name)).toLowerCase().includes(q)).slice(0,3);
+  const cs=M.v.filter(t=>(t.title+t.agent+pname(t.projects[0])+"tk-"+t.id).toLowerCase().includes(q)).sort(openSort).slice(0,7);
+  box.hidden=false;
+  box.innerHTML=ags.map(a=>`<button data-agent="${esc(a.name)}"><span class="dotav" style="background:${agentInfo(a.name).c}">${esc(agentInfo(a.name).m)}</span><span style="min-width:0"><span class="tt1">${esc(sname(a.name))}</span><span class="tm">agent · ${a.cards.length} 张卡</span></span></button>`).join("")+
+    cs.map(t=>`<button data-u="${esc(t.url)}"><span style="font-size:11px;color:var(--muted);padding-top:2px">TK-${esc(t.id)}</span><span style="min-width:0"><span class="tt1">${esc(t.title)}</span><span class="tm">${PLBL[t.status]||esc(t.status)} · ${esc(sname(t.agent))}</span></span></button>`).join("")||`<p class="empty" style="padding:6px 10px">没有匹配的结果</p>`;
+});
+$("q").addEventListener("blur",()=>setTimeout(()=>{$("sres").hidden=true;},200));
+$("proj").onchange=e=>{projFilter=e.target.value;renderAll();};
+function renderProjSel(){
+  const used=new Set(); items.forEach(t=>t.projects.forEach(p=>used.add(p)));
+  const opts=[...used].filter(k=>projNames[k]).sort((a,b)=>projNames[a].localeCompare(projNames[b],"zh"));
+  $("proj").innerHTML=`<option value="">全部项目</option>`+opts.map(k=>`<option value="${k}"${k===projFilter?" selected":""}>${esc(projNames[k])}</option>`).join("");
+}
+
+/* ---------- render ---------- */
+let lastM=null;
+function rerenderFloor(){ if(lastM) buildFloor(lastM); }
+function renderAll(){
+  const M=model(); lastM=M;
+  renderProjSel(); buildFloor(M); renderOverview(M); renderChart(M); renderLoad(M); renderOpen(M); computeChains(M); renderChain(); renderNeeds(M); applyView();
+}
+
+/* ---------- live data ---------- */
+function setLive(k,txt){ const l=$("live"); l.className="live "+k; $("liveTxt").textContent=txt; }
+function banner(h,demo){const b=$("banner"); if(!h){b.hidden=true;return;} b.hidden=false; b.className="banner"+(demo?" demo":""); b.innerHTML=h;}
+let mcpRef=null;
+const payloadOf=res=>extractJSON(res.payload??(res.content&&res.content[0]&&res.content[0].text));
+async function allPages(first,url){ let j=first,rows=[...j.results],n=0;
+  while(j.has_more&&j.next_cursor&&mcpRef&&n++<5){ const r=await mcpRef.callTool(SERVER,TOOL,viewQ(url,j.next_cursor),{cache:{staleTime:60000,gcTime:600000}});
+    j=payloadOf(r); if(!j||!Array.isArray(j.results))break; rows=rows.concat(j.results);} return rows; }
+async function onWork(res){ const j=payloadOf(res); if(!j||!Array.isArray(j.results)){setLive("warn","返回格式无法识别");return;}
+  let rows=j.results; try{rows=await allPages(j,WORK_VIEW);}catch(e){}
+  isDemo=false; banner(null); items=rows.map(norm); lastOk=res.cache?res.cache.storedAt:Date.now();
+  setLive("","Live · "+hm(lastOk)+" 同步"); renderAll(); }
+async function onProj(res){ const j=payloadOf(res); if(!j||!Array.isArray(j.results))return;
+  let rows=j.results; try{rows=await allPages(j,PROJ_VIEW);}catch(e){}
+  projNames={}; rows.forEach(r=>projNames[pid(r.url)]=r["简称"]||r["名称"]); renderAll(); }
+function onErr(err){
+  const c=err&&err.code;
+  const msgs={needs_reauth:"Notion 连接已过期，请在 claude.ai 设置 → 连接器 里重新连接 Notion。",
+    server_not_connected:"还没有连接 Notion，请在 claude.ai 设置 → 连接器 里添加 Notion。",
+    selection_required:"你连了多个 Notion，claude.ai 会提示你选一个。",
+    blocked_by_policy:"组织策略禁止了 Notion 的数据源查询，请联系管理员。",
+    approval_required:"需要你允许这个页面用你的 Notion 连接读取 Agent 工作项库。",
+    not_in_manifest:"这个页面的 Notion 读取权限被关掉了。",consent_required:"需要你在 claude.ai 里确认 Notion 读取。"};
+  if(msgs[c]){ items=[]; renderAll(); const ask=["approval_required","not_in_manifest","consent_required"].includes(c);
+    banner(`<b>读不到 Notion</b><br>${msgs[c]}${ask?'<br><button id="ask">允许读取 Notion</button>':""}`); if(ask)$("ask").onclick=oneShot;
+    setLive("err","未连接"); return; }
+  setLive("warn",lastOk?"数据停在 "+hm(lastOk):"暂时读不到");
+  if(!items.length) banner(`<b>暂时读不到 Notion</b><br>${c==="tool_error"?"Notion 返回错误："+esc((err.message||"").slice(0,140)):"Notion 没响应"}。稍后点右上角刷新。`);
+}
+async function oneShot(){ try{ await onWork(await mcpRef.callTool(SERVER,TOOL,WORK_Q,{cache:{refresh:true,staleTime:0,gcTime:600000}}));
+  await onProj(await mcpRef.callTool(SERVER,TOOL,PROJ_Q,{cache:{staleTime:0,gcTime:600000}})); }catch(e){onErr(e);} }
+function demo(why){
+  isDemo=true; const N=Date.now(),h=36e5,dk=o=>dayKey(N-o*DAY);
+  projNames={p1:"示例项目A",p2:"示例项目B",p3:"示例项目C"};
+  const rows=[
+    [1,"示例A：确认对外材料措辞","等我","Claude","claude","等你确认第 2 页表述",N-50*h,"p1","",[]],
+    [2,"示例A：整理实验数据模板","完成","Claude","claude","",N-30*h,"p1",dk(1),[]],
+    [3,"示例B：周报自动汇总","完成","Chloris AI工作管理助手","grok_bot","",N-60*h,"p2",dk(2),[]],
+    [4,"示例C：接口联调","等外部","资深工程师","grok_bot","等对方回传测试账号",N-80*h,"p3","",["k5"]],
+    [5,"示例C：编写规格与方案","完成","资深工程师","grok_bot","",N-100*h,"p3",dk(4),["k4","k6"]],
+    [6,"示例C：开发导入脚本","待办","资深工程师","deepseek_harness","依赖示例 5",N-6*h,"p3","",["k5"]],
+    [7,"示例B：知识库清理","完成","Grok Bot","grok_bot","",N-120*h,"p2",dk(5),[]],
+    [8,"示例A：数据同步机制","进行中","DeepSeek","deepseek_harness","",N-3*h,"p1","",[]]];
+  items=rows.map(r=>({url:"demo-"+r[0],key:"k"+r[0],id:r[0],title:r[1],status:r[2],agent:r[3],platform:r[4],next:r[5],review:r[0]===3,verdict:"",
+    done:r[8],created:r[6]-h,edited:r[6],projects:[r[7]],related:r[9],summary:"",out:""}));
+  banner(`<b>示例数据</b><br>${why}下面是虚构卡片，只用来演示。配置 Notion 集成 Token 后会换成真实工作项。`,true);
+  setLive("warn","示例数据"); renderAll();
+}
+
+/* ---------- boot ---------- */
+renderAll();
+$("live").onclick=()=>{};
+(async()=>{
+  // Standalone mode: fetch from local API proxy (Vercel serverless) instead of Claude MCP
+  async function loadData(){
+    setLive("warn","刷新中");
+    try{
+      const [workRes, projRes] = await Promise.all([
+        fetch("/api/work").then(r=>r.ok?r.json():Promise.reject(new Error("work "+r.status))),
+        fetch("/api/proj").then(r=>r.ok?r.json():Promise.reject(new Error("proj "+r.status)))
+      ]);
+      if(workRes.error) throw new Error(workRes.error);
+      isDemo=false; banner(null);
+      items = (workRes.results||[]).map(norm);
+      lastOk = Date.now();
+      if(projRes.results){
+        projNames={}; projRes.results.forEach(r=>projNames[pid(r.url)]=r["简称"]||r["名称"]||"");
+      }
+      setLive("","Live · "+hm(lastOk)+" 同步");
+      renderAll();
+    }catch(e){
+      console.error(e);
+      if(!items.length) demo("无法连接 Notion 代理（请在 Vercel 设置 NOTION_TOKEN 环境变量）。");
+      else setLive("warn","刷新失败");
+    }
+  }
+  $("live").onclick=loadData;
+  // initial load
+  loadData();
+  // refresh every 2 min
+  setInterval(loadData, 120000);
+})();
+})();
+</script>
+
+</body></html>
